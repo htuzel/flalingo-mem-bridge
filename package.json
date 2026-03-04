@@ -1,0 +1,49 @@
+{
+  "name": "@flalingo/mem-bridge",
+  "version": "1.0.0",
+  "description": "Syncs team-worthy observations from claude-mem to Mem0 Platform",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "flalingo-mem-bridge": "./dist/cli.js"
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"const fs=require('fs');const c=fs.readFileSync('dist/cli.js','utf8');fs.writeFileSync('dist/cli.js','#!/usr/bin/env node\\n'+c);fs.chmodSync('dist/cli.js','755')\"",
+    "dev": "tsx src/cli.ts",
+    "sync": "tsx src/cli.ts sync",
+    "init": "tsx src/cli.ts init",
+    "setup-mcp": "tsx src/cli.ts setup-mcp",
+    "install-service": "tsx src/cli.ts install-service",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint src/",
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/htuzel/flalingo-mem-bridge.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "openai": "^4.76.0",
+    "@google/generative-ai": "^0.21.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "tsx": "^4.19.0",
+    "@types/node": "^22.0.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "Flalingo Engineering",
+  "license": "MIT"
+}
