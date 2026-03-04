@@ -183,7 +183,13 @@ npm install -g @htuzel/mem-bridge
 | `codex-review.yml` | Before review | After review | `code-reviewer` |
 | `docs-auto-update.yml` | Before docs update | After commit | `doc-updater` |
 
-`MEM0_API_KEY` must be added to GitHub Secrets.
+3 secrets must be added to GitHub repository settings:
+
+| Secret | Value |
+|--------|-------|
+| `MEM0_API_KEY` | `m0-xxx...` |
+| `MEM0_ORG_ID` | `org_0mDzSo7k8lVCfxBHyKEwq8uW2pRd1T6BFADnvfkI` |
+| `MEM0_PROJECT_ID` | `proj_zNNTimZn5wZiAVjbr5RSUqMgfOgWVpjtMYYRnqsZ` |
 
 Details: `turacoon/docs/team-memory/cicd-integration.md`
 

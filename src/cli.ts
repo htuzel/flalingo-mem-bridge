@@ -313,15 +313,8 @@ function installService(): void {
 
   const interval = config.sync_interval_minutes * 60;
 
-  // Resolve tsx path
-  const tsxPath = join(
-    import.meta.dirname || ".",
-    "..",
-    "node_modules",
-    ".bin",
-    "tsx"
-  );
-  const cliPath = join(import.meta.dirname || ".", "cli.ts");
+  // Resolve compiled cli.js path
+  const cliPath = join(import.meta.dirname || ".", "cli.js");
 
   const plist = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -332,7 +325,6 @@ function installService(): void {
   <key>ProgramArguments</key>
   <array>
     <string>${process.execPath}</string>
-    <string>${tsxPath}</string>
     <string>${cliPath}</string>
     <string>sync</string>
   </array>
