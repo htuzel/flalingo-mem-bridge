@@ -1,12 +1,12 @@
 {
-  "name": "@flalingo/mem-bridge",
+  "name": "@htuzel/mem-bridge",
   "version": "1.0.0",
   "description": "Syncs team-worthy observations from claude-mem to Mem0 Platform",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "flalingo-mem-bridge": "./dist/cli.js"
+    "flalingo-mem-bridge": "dist/cli.js"
   },
   "files": [
     "dist/**/*.js",
