@@ -1,73 +1,73 @@
 # @flalingo/mem-bridge
 
-Flalingo ekibinin Claude Code session'larından öğrendiklerini takım hafızasına aktaran sync engine.
+Sync engine that transfers learnings from Flalingo team's Claude Code sessions into shared team memory.
 
-## Ne İşe Yarar?
+## What Does It Do?
 
 ```
-Developer Claude Code ile çalışır
+Developer works with Claude Code
         ↓
-claude-mem plugin otomatik olarak observation'lar yakalar
-  (bug çözümleri, pattern'ler, mimari kararlar)
+claude-mem plugin automatically captures observations
+  (bug fixes, patterns, architectural decisions)
         ↓
-Bridge periyodik olarak observation'ları okur
+Bridge periodically reads the observations
         ↓
-LLM filtresi takım için değerli olanları seçer
+LLM filter selects the ones valuable for the team
         ↓
-Mem0 Platform'a push eder (team-shared memory)
+Pushes to Mem0 Platform (team-shared memory)
         ↓
-Diğer developer'lar + CI/CD agent'ları bu bilgiyi kullanır
+Other developers + CI/CD agents use this knowledge
 ```
 
-3-Layer mimari:
-- **Layer 1**: [claude-mem](https://github.com/thedotmack/claude-mem) — kişisel session hafızası (lokal, free)
-- **Layer 2**: **Bu paket** — sync engine + LLM filter
-- **Layer 3**: [Mem0 Platform](https://mem0.ai) — takım hafızası (cloud)
+3-Layer architecture:
+- **Layer 1**: [claude-mem](https://github.com/thedotmack/claude-mem) — personal session memory (local, free)
+- **Layer 2**: **This package** — sync engine + LLM filter
+- **Layer 3**: [Mem0 Platform](https://mem0.ai) — team memory (cloud)
 
 ## Quick Start
 
-### 1. Gereksinimler
+### 1. Prerequisites
 
 ```bash
-# Bun (claude-mem worker için)
+# Bun (required for claude-mem worker)
 curl -fsSL https://bun.sh/install | bash
 
-# Claude Code'da claude-mem plugin
+# claude-mem plugin for Claude Code
 /plugin marketplace add thedotmack/claude-mem
 /plugin install claude-mem
-# → Claude Code'u restart edin
+# → Restart Claude Code
 ```
 
-### 2. Bridge kurulumu
+### 2. Install the Bridge
 
 ```bash
-# GitHub Packages'tan
+# From GitHub Packages
 npm install -g @flalingo/mem-bridge
 
-# Veya git'ten
+# Or from git
 npm install -g git+ssh://git@github.com:htuzel/flalingo-mem-bridge.git
 
-# Veya lokal
+# Or locally
 git clone git@github.com:htuzel/flalingo-mem-bridge.git
 cd flalingo-mem-bridge && npm install && npm run build && npm link
 ```
 
-### 3. Interactive setup
+### 3. Interactive Setup
 
 ```bash
 flalingo-mem-bridge init
 ```
 
-7 adımlık interaktif kurulum:
-1. claude-mem worker kontrolü
-2. Developer ID (takımdaki isminiz)
+7-step interactive setup:
+1. claude-mem worker check
+2. Developer ID (your name in the team)
 3. Mem0 credentials (API key, org ID, project ID)
 4. Filter LLM provider (Anthropic / OpenAI / Google)
-5. Filter model seçimi (default: `claude-sonnet-4-6`)
+5. Filter model selection (default: `claude-sonnet-4-6`)
 6. Filter API key
-7. Config kaydı + Mem0 MCP kurulumu teklifi
+7. Config save + Mem0 MCP setup prompt
 
-Her adımda parametrenin ne işe yaradığı, nereden alınacağı ve formatı açıklanır.
+Each step explains what the parameter does, where to get it, and the expected format.
 
 ### 4. Auto-sync
 
@@ -76,20 +76,20 @@ flalingo-mem-bridge install-service
 launchctl load ~/Library/LaunchAgents/com.flalingo.mem-bridge.plist
 ```
 
-## CLI Komutları
+## CLI Commands
 
-| Komut | Açıklama |
-|-------|----------|
-| `init` | Full interaktif kurulum (bridge config + Mem0 MCP) |
-| `setup-mcp` | Sadece Mem0 MCP server kurulumu (Claude Code'a `search_memories` ekler) |
-| `sync` | Manuel sync çalıştır |
-| `status` | Mevcut konfigürasyonu göster |
-| `install-service` | macOS LaunchAgent kur (otomatik sync) |
-| `help` | Yardım |
+| Command | Description |
+|---------|-------------|
+| `init` | Full interactive setup (bridge config + Mem0 MCP) |
+| `setup-mcp` | Mem0 MCP server setup only (adds `search_memories` to Claude Code) |
+| `sync` | Run manual sync |
+| `status` | Show current configuration |
+| `install-service` | Install macOS LaunchAgent (auto-sync) |
+| `help` | Help |
 
-## Konfigürasyon
+## Configuration
 
-Config dosyası: `~/.flalingo-mem-bridge/config.json`
+Config file: `~/.flalingo-mem-bridge/config.json`
 
 ```jsonc
 {
@@ -97,41 +97,41 @@ Config dosyası: `~/.flalingo-mem-bridge/config.json`
   "mem0_api_key": "m0-xxx",                         // Mem0 API key
   "mem0_org_id": "org_xxx",                          // Mem0 organization
   "mem0_project_id": "proj_xxx",                     // Mem0 project
-  "developer_id": "htuzel",                          // Takımdaki isminiz
+  "developer_id": "htuzel",                          // Your name in the team
   "filter_provider": "anthropic",                    // anthropic | openai | google
-  "filter_model": "claude-sonnet-4-6",               // Filtreleme modeli
+  "filter_model": "claude-sonnet-4-6",               // Filter model
   "filter_api_key": "sk-ant-xxx",                    // Provider API key
-  "sync_interval_minutes": 30,                       // Auto-sync aralığı
-  "excluded_repos": [],                              // Atlanacak repolar
+  "sync_interval_minutes": 30,                       // Auto-sync interval
+  "excluded_repos": [],                              // Repos to skip
   "log_file": "~/.flalingo-mem-bridge/sync.log"
 }
 ```
 
-### Filter Model Seçenekleri
+### Filter Model Options
 
-| Provider | Model | Aylık Maliyet | Not |
-|----------|-------|--------------|-----|
-| **Anthropic** | `claude-sonnet-4-6` | ~$5-8 | Önerilen — en iyi filtreleme |
-| Anthropic | `claude-haiku-4-5-20251001` | ~$1-2 | Budget |
-| OpenAI | `gpt-4o-mini` | ~$0.50 | En ucuz |
-| Google | `gemini-2.0-flash` | ~$0.30 | En ucuz |
+| Provider | Model | Monthly Cost | Notes |
+|----------|-------|-------------|-------|
+| **Anthropic** | `claude-sonnet-4-6` | ~$5-8 | Recommended — best filtering quality |
+| Anthropic | `claude-haiku-4-5-20251001` | ~$1-2 | Budget option |
+| OpenAI | `gpt-4o-mini` | ~$0.50 | Cheapest |
+| Google | `gemini-2.0-flash` | ~$0.30 | Cheapest |
 
-Model değiştirmek: config'de `filter_provider` ve `filter_model`'i değiştirin.
+To change model: update `filter_provider` and `filter_model` in the config.
 
 ## Flalingo Mem0 Credentials
 
-| Parametre | Değer |
+| Parameter | Value |
 |-----------|-------|
 | `MEM0_ORG_ID` | `org_0mDzSo7k8lVCfxBHyKEwq8uW2pRd1T6BFADnvfkI` |
 | `MEM0_PROJECT_ID` | `proj_zNNTimZn5wZiAVjbr5RSUqMgfOgWVpjtMYYRnqsZ` |
-| `MEM0_API_KEY` | Takım liderinden alın |
+| `MEM0_API_KEY` | Get from team lead |
 
-## Publish (Maintainer)
+## Publishing (Maintainer)
 
-### İlk kez publish
+### First-time publish
 
 ```bash
-# 1. GitHub Personal Access Token (PAT) oluşturun:
+# 1. Create a GitHub Personal Access Token (PAT):
 #    github.com → Settings → Developer settings → Personal access tokens
 #    Scope: write:packages, read:packages
 
@@ -146,7 +146,7 @@ npm run build
 npm publish
 ```
 
-### Versiyon güncelleme
+### Version update
 
 ```bash
 # Patch (1.0.0 → 1.0.1)
@@ -159,35 +159,35 @@ npm version minor
 npm publish
 ```
 
-### Developer'ların kurulumu için
+### Developer installation setup
 
-Her developer'ın `.npmrc` dosyasına eklemesi gereken:
+Each developer needs to add the following to their `.npmrc`:
 ```
 @flalingo:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=ghp_THEIR_GITHUB_TOKEN
 ```
 
-Sonra:
+Then:
 ```bash
 npm install -g @flalingo/mem-bridge
 ```
 
-## CI/CD Entegrasyonu
+## CI/CD Integration
 
-4 workflow Mem0 team memory ile entegre:
+4 workflows integrated with Mem0 team memory:
 
 | Workflow | Fetch | Store | agent_id |
 |----------|-------|-------|----------|
-| `ai-coding.yml` | Plan öncesi | Implementation sonrası | `ai-coder` |
-| `ai-revision.yml` | Plan öncesi | PR creation sonrası | `ai-coder` |
-| `codex-review.yml` | Review öncesi | Review sonrası | `code-reviewer` |
-| `docs-auto-update.yml` | Docs update öncesi | Commit sonrası | `doc-updater` |
+| `ai-coding.yml` | Before plan | After implementation | `ai-coder` |
+| `ai-revision.yml` | Before plan | After PR creation | `ai-coder` |
+| `codex-review.yml` | Before review | After review | `code-reviewer` |
+| `docs-auto-update.yml` | Before docs update | After commit | `doc-updater` |
 
-GitHub Secrets'a `MEM0_API_KEY` eklenmeli.
+`MEM0_API_KEY` must be added to GitHub Secrets.
 
-Detaylar: `turacoon/docs/team-memory/cicd-integration.md`
+Details: `turacoon/docs/team-memory/cicd-integration.md`
 
-## Mimari
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -219,12 +219,12 @@ Detaylar: `turacoon/docs/team-memory/cicd-integration.md`
 
 | Problem | Solution |
 |---------|----------|
-| `claude-mem not available` | Claude Code'u başlatın (worker auto-start) |
-| `mem0_api_key not configured` | `flalingo-mem-bridge init` çalıştırın |
-| `Filter API error` | `filter_api_key` config'e ekleyin veya `FILTER_API_KEY` env var |
-| `search_memories` tool yok | `flalingo-mem-bridge setup-mcp` sonra Claude Code restart |
-| Sync 0 insight | Normal — tüm observation'lar team-worthy olmayabilir |
-| npm install 404 | `.npmrc`'de `@flalingo` registry ayarı var mı? |
+| `claude-mem not available` | Start Claude Code (worker auto-starts) |
+| `mem0_api_key not configured` | Run `flalingo-mem-bridge init` |
+| `Filter API error` | Add `filter_api_key` to config or set `FILTER_API_KEY` env var |
+| `search_memories` tool missing | Run `flalingo-mem-bridge setup-mcp` then restart Claude Code |
+| Sync 0 insights | Normal — not all observations may be team-worthy |
+| npm install 404 | Check if `@flalingo` registry is set in `.npmrc` |
 
 ## License
 
