@@ -20,15 +20,22 @@ export async function pushInsightsToMem0(
   let pushed = 0;
 
   for (const insight of insights) {
-    const memory: Mem0Memory = {
+    const body = {
       messages: [
         {
+          role: "user",
+          content: `Team insight from ${config.developer_id}: ${insight.content}`,
+        },
+        {
           role: "assistant",
-          content: insight.content,
+          content: `Noted. ${insight.content}`,
         },
       ],
       user_id: "team-shared",
+      org_id: config.mem0_org_id,
+      project_id: config.mem0_project_id,
       app_id: project,
+      async_mode: false,
       metadata: {
         author: config.developer_id,
         source: "claude-mem-bridge",
@@ -44,15 +51,16 @@ export async function pushInsightsToMem0(
         Authorization: `Token ${config.mem0_api_key}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(memory),
+      body: JSON.stringify(body),
     });
 
+    const resBody = await res.text();
     if (!res.ok) {
-      const body = await res.text();
-      console.error(`Mem0 API error for insight: ${res.status} ${body}`);
+      console.error(`Mem0 API error for insight: ${res.status} ${resBody}`);
       continue;
     }
 
+    console.log(`  Mem0 response: ${resBody.slice(0, 200)}`);
     pushed++;
   }
 
@@ -64,13 +72,15 @@ export async function searchMem0(
   config: BridgeConfig,
   options?: { app_id?: string; agent_id?: string; limit?: number }
 ): Promise<any[]> {
-  const body: Record<string, any> = {
+  const reqBody: Record<string, any> = {
     query,
     user_id: "team-shared",
+    org_id: config.mem0_org_id,
+    project_id: config.mem0_project_id,
     limit: options?.limit || 10,
   };
-  if (options?.app_id) body.app_id = options.app_id;
-  if (options?.agent_id) body.agent_id = options.agent_id;
+  if (options?.app_id) reqBody.app_id = options.app_id;
+  if (options?.agent_id) reqBody.agent_id = options.agent_id;
 
   const res = await fetch(`${MEM0_API_BASE}/memories/search/`, {
     method: "POST",
@@ -78,7 +88,7 @@ export async function searchMem0(
       Authorization: `Token ${config.mem0_api_key}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(reqBody),
   });
 
   if (!res.ok) return [];
