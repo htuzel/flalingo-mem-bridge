@@ -140,12 +140,12 @@ async function setupMem0Mcp(
   userId?: string
 ): Promise<void> {
   console.log("\n╔══════════════════════════════════════════════════╗");
-  console.log("║    Mem0 MCP Server — Claude Code Entegrasyonu    ║");
+  console.log("║    Mem0 MCP Server — Claude Code Integration     ║");
   console.log("╚══════════════════════════════════════════════════╝\n");
 
-  console.log("Bu adim Claude Code'a 'search_memories' tool'unu ekler.");
-  console.log("Boylece Claude Code session'larinizda takim hafizasini");
-  console.log("arayabilir ve kullanabilirsiniz.\n");
+  console.log("This step adds the 'search_memories' tool to Claude Code.");
+  console.log("This allows you to search and use team memory");
+  console.log("during your Claude Code sessions.\n");
 
   // Try to load existing config for defaults
   let existingConfig: ReturnType<typeof loadConfig> | null = null;
@@ -159,7 +159,7 @@ async function setupMem0Mcp(
   const defaultApiKey = apiKey || existingConfig?.mem0_api_key || "";
   if (!defaultApiKey) {
     console.log("[1/4] Mem0 API Key");
-    console.log("  Mem0 Platform'a erismek icin gereken API anahtari.");
+    console.log("  API key required to access Mem0 Platform.");
     console.log("  https://app.mem0.ai → Settings → API Keys");
     console.log("  Format: m0-xxxxxxxxxxxx\n");
   }
@@ -169,7 +169,7 @@ async function setupMem0Mcp(
   const defaultOrgId = orgId || existingConfig?.mem0_org_id || "";
   if (!defaultOrgId) {
     console.log("\n[2/4] Mem0 Organization ID");
-    console.log("  Takiminizin Mem0'daki organizasyon kimlik numarasi.");
+    console.log("  Your team's organization ID on Mem0.");
     console.log("  https://app.mem0.ai → Organization → Settings");
     console.log("  Format: org_xxxxxxxxxxxx\n");
   }
@@ -179,7 +179,7 @@ async function setupMem0Mcp(
   const defaultProjectId = projectId || existingConfig?.mem0_project_id || "";
   if (!defaultProjectId) {
     console.log("\n[3/4] Mem0 Project ID");
-    console.log("  Hafizalarin depolandigi proje kimlik numarasi.");
+    console.log("  The project ID where memories are stored.");
     console.log("  https://app.mem0.ai → Project → Settings");
     console.log("  Format: proj_xxxxxxxxxxxx\n");
   }
@@ -189,14 +189,14 @@ async function setupMem0Mcp(
   const defaultUserId = userId || existingConfig?.developer_id || "";
   if (!defaultUserId) {
     console.log("\n[4/4] User ID");
-    console.log("  Claude Code'da sizi tanimlayan isim.");
-    console.log("  Ornek: htuzel, ali, mehmet\n");
+    console.log("  Your identity in Claude Code.");
+    console.log("  Example: htuzel, ali, mehmet\n");
   }
   const finalUserId = defaultUserId || await prompt("  User ID: ");
 
   // Validate inputs
   if (!finalApiKey || !finalOrgId || !finalProjectId || !finalUserId) {
-    console.error("\n  ERROR — Tum alanlar zorunludur.");
+    console.error("\n  ERROR — All fields are required.");
     process.exit(1);
   }
 
@@ -204,22 +204,22 @@ async function setupMem0Mcp(
   try {
     execSync("which claude", { stdio: "pipe" });
   } catch {
-    console.error("\n  ERROR — 'claude' CLI bulunamadi.");
-    console.error("  Claude Code'un kurulu ve PATH'te oldugundan emin olun.");
+    console.error("\n  ERROR — 'claude' CLI not found.");
+    console.error("  Make sure Claude Code is installed and available in PATH.");
     process.exit(1);
   }
 
   // Remove existing mem0 MCP if present
-  console.log("\n  Mevcut mem0 MCP konfigurasyonu kontrol ediliyor...");
+  console.log("\n  Checking existing mem0 MCP configuration...");
   try {
     execSync("claude mcp remove mem0 -s user 2>/dev/null", { stdio: "pipe" });
-    console.log("  Eski konfigurasyon temizlendi.");
+    console.log("  Previous configuration removed.");
   } catch {
     // No existing config to remove
   }
 
   // Add Mem0 MCP server
-  console.log("  Mem0 MCP server ekleniyor...\n");
+  console.log("  Adding Mem0 MCP server...\n");
 
   const mcpCmd = [
     "claude", "mcp", "add", "--scope", "user", "mem0",
@@ -232,34 +232,34 @@ async function setupMem0Mcp(
 
   try {
     execSync(mcpCmd, { stdio: "inherit" });
-    console.log("\n  Mem0 MCP server basariyla eklendi!");
+    console.log("\n  Mem0 MCP server added successfully!");
   } catch (err: any) {
-    console.error(`\n  ERROR — MCP ekleme basarisiz: ${err.message}`);
-    console.error("  Manuel olarak eklemek icin:");
+    console.error(`\n  ERROR — Failed to add MCP: ${err.message}`);
+    console.error("  To add manually:");
     console.error(`  ${mcpCmd}`);
     process.exit(1);
   }
 
   // Verify
-  console.log("\n  Dogrulama...");
+  console.log("\n  Verifying...");
   try {
     const verifyOutput = execSync("claude mcp get mem0", {
       encoding: "utf-8",
       stdio: ["pipe", "pipe", "pipe"],
     });
     if (verifyOutput.includes("mem0")) {
-      console.log("  OK — Mem0 MCP konfigurasyonu dogrulandi.");
+      console.log("  OK — Mem0 MCP configuration verified.");
     }
   } catch {
-    console.log("  WARNING — Dogrulama yapilamadi. Claude Code'u yeniden baslatin.");
+    console.log("  WARNING — Verification failed. Restart Claude Code.");
   }
 
-  console.log("\n  Kullanim:");
-  console.log("  Claude Code session'inda 'search_memories' tool'u ile");
-  console.log("  takim hafizasini arayabilirsiniz. Ornekler:");
-  console.log("    - 'Bu repo hakkinda takim ne biliyor?'");
-  console.log("    - 'Benzer bug cozumleri'");
-  console.log("    - 'Payment servisi API patterni'");
+  console.log("\n  Usage:");
+  console.log("  Use the 'search_memories' tool in your Claude Code sessions");
+  console.log("  to search team memory. Examples:");
+  console.log("    - 'What does the team know about this repo?'");
+  console.log("    - 'Similar bug fixes'");
+  console.log("    - 'Payment service API patterns'");
 }
 
 async function sync(): Promise<void> {
