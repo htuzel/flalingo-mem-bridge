@@ -1,4 +1,4 @@
-# @flalingo/mem-bridge
+# @htuzel/mem-bridge
 
 Sync engine that transfers learnings from Flalingo team's Claude Code sessions into shared team memory.
 
@@ -42,7 +42,7 @@ curl -fsSL https://bun.sh/install | bash
 
 ```bash
 # From GitHub Packages
-npm install -g @flalingo/mem-bridge
+npm install -g @htuzel/mem-bridge
 
 # Or from git
 npm install -g git+ssh://git@github.com:htuzel/flalingo-mem-bridge.git
@@ -163,13 +163,13 @@ npm publish
 
 Each developer needs to add the following to their `.npmrc`:
 ```
-@flalingo:registry=https://npm.pkg.github.com
+@htuzel:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=ghp_THEIR_GITHUB_TOKEN
 ```
 
 Then:
 ```bash
-npm install -g @flalingo/mem-bridge
+npm install -g @htuzel/mem-bridge
 ```
 
 ## CI/CD Integration
