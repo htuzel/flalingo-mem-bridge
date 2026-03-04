@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { saveConfig, loadConfig, ensureConfigDir, CONFIG_PATH } from "./config.js";
 import { checkHealth } from "./claude-mem-client.js";
 import { runSync } from "./sync.js";
