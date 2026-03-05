@@ -52,10 +52,13 @@ export async function fetchNewObservations(
     offset += limit;
   }
 
-  // Filter out excluded repos
-  return allItems.filter(
-    (obs) => !config.excluded_repos.includes(obs.project)
-  );
+  // Filter repos: whitelist (included) then blacklist (excluded)
+  return allItems.filter((obs) => {
+    if (config.included_repos.length > 0) {
+      if (!config.included_repos.includes(obs.project)) return false;
+    }
+    return !config.excluded_repos.includes(obs.project);
+  });
 }
 
 export async function checkHealth(

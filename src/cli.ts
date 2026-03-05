@@ -28,7 +28,7 @@ async function init(): Promise<void> {
   ensureConfigDir();
 
   // Check claude-mem
-  console.log("[1/7] Checking claude-mem worker...");
+  console.log("[1/8] Checking claude-mem worker...");
   const health = await checkHealth("http://localhost:37777");
   if (health.ok) {
     console.log(`  OK — claude-mem v${health.version} running\n`);
@@ -38,13 +38,13 @@ async function init(): Promise<void> {
   }
 
   // Developer ID
-  console.log("[2/7] Developer Identity");
+  console.log("[2/8] Developer Identity");
   console.log("  Your unique developer ID. Used as 'author' when sharing");
   console.log("  insights with the team. Example: htuzel, ali, mehmet\n");
   const developerId = await prompt("  Developer ID: ");
 
   // Mem0 credentials
-  console.log("\n[3/7] Mem0 Platform Credentials");
+  console.log("\n[3/8] Mem0 Platform Credentials");
   console.log("  Get these from https://app.mem0.ai → Settings → API Keys");
   console.log("  These connect the bridge to your team's shared memory.\n");
 
@@ -58,7 +58,7 @@ async function init(): Promise<void> {
   const mem0ProjectId = await prompt("  Mem0 Project ID: ");
 
   // Filter provider
-  console.log("\n[4/7] Filter LLM Provider");
+  console.log("\n[4/8] Filter LLM Provider");
   console.log("  The bridge uses an LLM to decide which observations are");
   console.log("  worth sharing with the team. Choose a provider:\n");
   console.log("  anthropic  — Haiku 4.5 (default, fast, ~$1-2/mo)");
@@ -69,7 +69,7 @@ async function init(): Promise<void> {
   )) as any || "anthropic";
 
   // Filter model
-  console.log("\n[5/7] Filter Model");
+  console.log("\n[5/8] Filter Model");
   const defaultModels: Record<string, string> = {
     anthropic: "claude-haiku-4-5-20251001",
     openai: "gpt-4o-mini",
@@ -82,7 +82,7 @@ async function init(): Promise<void> {
   )) || defaultModel;
 
   // Filter API key
-  console.log("\n[6/7] Filter API Key");
+  console.log("\n[6/8] Filter API Key");
   console.log(`  API key for ${filterProvider} to run the filter LLM.`);
   if (filterProvider === "anthropic") {
     console.log("  For Anthropic: starts with sk-ant-");
@@ -105,6 +105,16 @@ async function init(): Promise<void> {
     console.log("  Set it later in config or as FILTER_API_KEY env var.");
   }
 
+  // Repository whitelist
+  console.log("\n[7/8] Repository Whitelist (Privacy)");
+  console.log("  If you want to sync ONLY specific repos, list them here.");
+  console.log("  Leave empty to sync all repos (default).");
+  console.log("  Comma-separated. Example: flalingo-crm, flalingo-api\n");
+  const includedReposInput = await prompt("  Included repos (empty = all): ");
+  const includedRepos = includedReposInput
+    ? includedReposInput.split(",").map((r) => r.trim()).filter(Boolean)
+    : [];
+
   saveConfig({
     developer_id: developerId,
     mem0_api_key: mem0ApiKey,
@@ -113,9 +123,10 @@ async function init(): Promise<void> {
     filter_provider: filterProvider,
     filter_model: filterModel,
     filter_api_key: filterApiKey,
+    included_repos: includedRepos,
   });
 
-  console.log(`\n[7/7] Config saved to ${CONFIG_PATH}`);
+  console.log(`\n[8/8] Config saved to ${CONFIG_PATH}`);
 
   // Offer to setup Mem0 MCP
   console.log("\n────────────────────────────────────────────────");
@@ -287,6 +298,8 @@ function status(): void {
     console.log(`Filter: ${config.filter_provider}/${config.filter_model}`);
     console.log(`claude-mem API: ${config.claude_mem_api}`);
     console.log(`Mem0 API key: ${config.mem0_api_key ? "***configured***" : "NOT SET"}`);
+    console.log(`Included repos: ${config.included_repos.length > 0 ? config.included_repos.join(", ") : "(all)"}`);
+    console.log(`Excluded repos: ${config.excluded_repos.length > 0 ? config.excluded_repos.join(", ") : "(none)"}`);
     console.log(`Log: ${config.log_file}`);
   } catch (err: any) {
     console.error(err.message);

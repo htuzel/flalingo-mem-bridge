@@ -13,6 +13,7 @@ export interface BridgeConfig {
   filter_model: string;
   filter_api_key: string;
   sync_interval_minutes: number;
+  included_repos: string[];
   excluded_repos: string[];
   log_file: string;
 }
@@ -32,6 +33,7 @@ const DEFAULTS: BridgeConfig = {
   filter_model: "claude-haiku-4-5-20251001",
   filter_api_key: "",
   sync_interval_minutes: 30,
+  included_repos: [],
   excluded_repos: [],
   log_file: join(CONFIG_DIR, "sync.log"),
 };
