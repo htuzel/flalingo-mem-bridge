@@ -5,7 +5,7 @@ import {
 } from "./config.js";
 import { fetchNewObservations, checkHealth } from "./claude-mem-client.js";
 import { filterTeamWorthy } from "./filter.js";
-import { pushInsightsToMem0 } from "./mem0-client.js";
+import { pushInsightsToMem0, ensureCategories } from "./mem0-client.js";
 import { appendFileSync } from "fs";
 
 function log(config: { log_file: string }, level: string, msg: string): void {
@@ -64,10 +64,14 @@ export async function runSync(): Promise<{
     byProject.get(project)!.push(obs);
   }
 
+  // 6. Ensure Mem0 categories for repos and developer
+  const repoNames = [...byProject.keys()];
+  await ensureCategories(config, repoNames, [config.developer_id]);
+
   let totalInsights = 0;
   let totalPushed = 0;
 
-  // 6. Filter and push per project
+  // 7. Filter and push per project
   for (const [project, projectObs] of byProject) {
     log(
       config,

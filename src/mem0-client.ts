@@ -2,6 +2,7 @@ import type { BridgeConfig } from "./config.js";
 import type { TeamInsight } from "./filter.js";
 
 const MEM0_API_BASE = "https://api.mem0.ai/v1";
+const MEM0_INTERNAL_BASE = "https://api.mem0.ai";
 
 interface Mem0Memory {
   messages: { role: string; content: string }[];
@@ -65,6 +66,80 @@ export async function pushInsightsToMem0(
   }
 
   return pushed;
+}
+
+type CategoryEntry = Record<string, string>;
+
+function projectUrl(config: BridgeConfig): string {
+  return `${MEM0_INTERNAL_BASE}/api/v1/orgs/organizations/${config.mem0_org_id}/projects/${config.mem0_project_id}/`;
+}
+
+async function getProjectCategories(
+  config: BridgeConfig
+): Promise<CategoryEntry[]> {
+  const res = await fetch(projectUrl(config), {
+    method: "GET",
+    headers: {
+      Authorization: `Token ${config.mem0_api_key}`,
+    },
+  });
+
+  if (!res.ok) {
+    console.error(`Failed to fetch project categories: ${res.status}`);
+    return [];
+  }
+
+  const data = await res.json();
+  return data.custom_categories || [];
+}
+
+export async function ensureCategories(
+  config: BridgeConfig,
+  repos: string[],
+  developers: string[]
+): Promise<void> {
+  const existing = await getProjectCategories(config);
+  const existingKeys = new Set(existing.flatMap((entry) => Object.keys(entry)));
+
+  const newEntries: CategoryEntry[] = [];
+
+  for (const repo of repos) {
+    const key = `repo_${repo.replace(/-/g, "_")}`;
+    if (!existingKeys.has(key)) {
+      newEntries.push({ [key]: `Insights from the ${repo} repository` });
+    }
+  }
+
+  for (const dev of developers) {
+    const key = `developer_${dev.replace(/-/g, "_")}`;
+    if (!existingKeys.has(key)) {
+      newEntries.push({ [key]: `Insights authored by developer ${dev}` });
+    }
+  }
+
+  if (newEntries.length === 0) {
+    return;
+  }
+
+  const merged = [...existing, ...newEntries];
+
+  const res = await fetch(projectUrl(config), {
+    method: "PATCH",
+    headers: {
+      Authorization: `Token ${config.mem0_api_key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ custom_categories: merged }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    console.error(`Failed to update categories: ${res.status} ${body}`);
+    return;
+  }
+
+  const added = newEntries.map((e) => Object.keys(e)[0]).join(", ");
+  console.log(`[INFO] Updated Mem0 categories: added ${added}`);
 }
 
 export async function searchMem0(
