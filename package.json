@@ -1,6 +1,6 @@
 {
   "name": "@htuzel/mem-bridge",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Syncs team-worthy observations from claude-mem to Mem0 Platform",
   "type": "module",
   "main": "dist/index.js",
