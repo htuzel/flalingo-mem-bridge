@@ -58,14 +58,15 @@ cd flalingo-mem-bridge && npm install && npm run build && npm link
 flalingo-mem-bridge init
 ```
 
-7-step interactive setup:
+8-step interactive setup:
 1. claude-mem worker check
 2. Developer ID (your name in the team)
 3. Mem0 credentials (API key, org ID, project ID)
 4. Filter LLM provider (Anthropic / OpenAI / Google)
 5. Filter model selection (default: `claude-sonnet-4-6`)
 6. Filter API key
-7. Config save + Mem0 MCP setup prompt
+7. Repository whitelist (privacy — leave empty to sync all)
+8. Config save + Mem0 MCP setup prompt
 
 Each step explains what the parameter does, where to get it, and the expected format.
 
@@ -102,9 +103,28 @@ Config file: `~/.flalingo-mem-bridge/config.json`
   "filter_model": "claude-sonnet-4-6",               // Filter model
   "filter_api_key": "sk-ant-xxx",                    // Provider API key
   "sync_interval_minutes": 30,                       // Auto-sync interval
-  "excluded_repos": [],                              // Repos to skip
+  "included_repos": [],                              // Whitelist (empty = all)
+  "excluded_repos": [],                              // Blacklist (always applied)
   "log_file": "~/.flalingo-mem-bridge/sync.log"
 }
+```
+
+### Repository Filtering
+
+Two levels of control for privacy:
+
+- **`included_repos`** (whitelist): If set, **only** these repos will sync. Empty = sync all.
+- **`excluded_repos`** (blacklist): Always applied. These repos are never synced.
+
+If a repo is in both lists, `excluded_repos` wins (safe by default).
+
+```jsonc
+// Example: only sync these 2 repos
+"included_repos": ["flalingo-crm", "flalingo-api"],
+
+// Example: sync all except these
+"included_repos": [],
+"excluded_repos": ["my-private-project"]
 ```
 
 ### Filter Model Options
