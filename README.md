@@ -1,6 +1,3 @@
-# @htuzel/mem-bridge
-
-Sync engine that transfers learnings from Flalingo team's Claude Code sessions into shared team memory.
 
 ## What Does It Do?
 
