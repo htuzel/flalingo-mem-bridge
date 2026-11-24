@@ -249,6 +249,4 @@ Details: `turacoon/docs/team-memory/cicd-integration.md`
 | Sync 0 insights | Normal — not all observations may be team-worthy |
 | npm install 404 | Check if `@flalingo` registry is set in `.npmrc` |
 
-## License
-
-MIT — Flalingo Engineering
+The active development and maintenance of this project have moved to a repository under Flalingo. This repository remains available as a general-purpose reference implementation to illustrate the overall architecture, core concepts, and integration approach. It is intended to help developers understand how the components fit together and provide a starting point for adapting the framework to their own environments. It may not reflect the latest changes or the implementation currently used by the Flalingo Engineering team.
